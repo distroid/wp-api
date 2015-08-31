@@ -17,6 +17,14 @@ module WP::API
       resource_subpath('posts', id, 'meta', query).first
     end
 
+    def post_categories(id, query = {})
+      resource_subpath('posts', id, 'terms/category', query)
+    end
+
+    def post_tags(id, query = {})
+      resource_subpath('posts', id, 'terms/tag', query)
+    end
+
     def comments(query = {})
       resources('comments', query)
     end
@@ -97,7 +105,11 @@ module WP::API
 
     def resource_subpath(res, id, subpath, query = {})
       query.merge(should_raise_on_empty: false)
-      get_request("#{res}/#{id}/#{subpath}", query)
+      resources, headers = get_request("#{res}/#{id}/#{subpath}", query)
+      resource_name      = subpath.split('/').last
+      resources.collect do |hash|
+        resource_class(resource_name).new(hash, headers)
+      end
     end
 
     def resource_named(res, slug)
