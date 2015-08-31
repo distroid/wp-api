@@ -8,6 +8,8 @@ module WP::API
     include HTTParty
     include Endpoints
 
+    default_options.update(verify: false)
+
     attr_accessor :host
 
     DIRECT_PARAMS = %w(type context filter)
