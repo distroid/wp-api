@@ -42,9 +42,9 @@ module WP::API
       end
 
       if response.code != 200
-        raise WP::API::ResourceNotFoundError
+        raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
       elsif response.parsed_response.empty? && should_raise_on_empty
-        raise WP::API::ResourceNotFoundError
+        raise WP::API::ResourceNotFoundError.new('Empty responce for ' + path)
       else
         [ response.parsed_response, response.headers ]
       end
@@ -61,9 +61,9 @@ module WP::API
       end
 
       if !(200..201).include? response.code
-        raise WP::API::ResourceNotFoundError
+        raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
       elsif (response.parsed_response.nil? || response.parsed_response.empty?) && should_raise_on_empty
-        raise WP::API::ResourceNotFoundError
+        raise WP::API::ResourceNotFoundError.new('Empty responce for ' + path)
       else
         [ response.parsed_response, response.headers ]
       end
