@@ -1,6 +1,7 @@
 require 'httparty'
 require 'addressable/uri'
 require 'wp/api/endpoints'
+require 'wp/api/oauth1'
 require 'active_support/hash_with_indifferent_access'
 
 module WP::API
@@ -14,33 +15,35 @@ module WP::API
 
     DIRECT_PARAMS = %w(type context filter)
 
-    def initialize(host:, scheme: 'http', user: nil, password: nil, v: 2)
-      @scheme   = scheme
-      @host     = host
-      @user     = user
-      @password = password
-      @verison  = v
+    def initialize(host:, scheme: 'http')
+      @scheme     = scheme
+      @host       = host
+      @basic_auth = {}
+      @oauth      = nil
 
       fail ':host is required' unless host.is_a?(String) && host.length > 0
     end
 
     def inspect
-      to_s.sub(/>$/, '') + " @scheme=\"#{@scheme}\" @host=\"#{@host}\" @user=\"#{@user}\" @password=#{@password.present?}>"
+      to_s.sub(/>$/, '') + " @scheme=\"#{@scheme}\" @host=\"#{@host}\" @basic_auth=\"#{!@basic_auth.empty?}\" @oauth=\"#{!@oauth.nil?}\">"
+    end
+
+    def basic_auth(username:, password:)
+      @basic_auth = {username: username, password: password}
+    end
+
+    def oauth(consumer_key:, consumer_secret:, oauth_token:, oauth_token_secret:)
+      @oauth = WP::API::Oauth1.new(consumer_key: consumer_key, consumer_secret: consumer_secret, oauth_token: oauth_token, oauth_token_secret: oauth_token_secret)
     end
 
     protected
 
     def get_request(resource, query = {})
       should_raise_on_empty = query.delete(:should_raise_on_empty) { true }
-      query = ActiveSupport::HashWithIndifferentAccess.new(query)
-      path = url_for(resource, query)
+      path    = url_for(resource, ActiveSupport::HashWithIndifferentAccess.new(query))
+      options = request_options('get', url_for(resource, {}), query)
 
-      response = if authenticate?
-        Client.get(path, basic_auth: { username: @user, password: @password })
-      else
-        Client.get(path)
-      end
-
+      response = Client.get(path, options)
       if response.code != 200
         raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
       elsif response.parsed_response.empty? && should_raise_on_empty
@@ -51,15 +54,13 @@ module WP::API
     end
 
     def post_request(resource, data = {})
-      should_raise_on_empty = data.delete(:should_raise_on_empty) || true
-      path = url_for(resource, {})
+      should_raise_on_empty = data.delete(:should_raise_on_empty) { true }
 
-      response = if authenticate?
-        Client.post(path, { :body => data, basic_auth: { username: @user, password: @password } })
-      else
-        Client.post(path, { :body => data })
-      end
+      path           = url_for(resource, {})
+      options        = request_options('post', path, data)
+      options[:body] = data
 
+      response       = Client.post(path, options)
       if !(200..201).include? response.code
         raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
       elsif (response.parsed_response.nil? || response.parsed_response.empty?) && should_raise_on_empty
@@ -71,13 +72,17 @@ module WP::API
 
     private
 
-    def authenticate?
-      @user && @password
+    def request_options(http_method, request_url, params)
+      result              = {}
+      result[:basic_auth] = @basic_auth unless @basic_auth.empty?
+      unless @oauth.nil?
+        result[:headers]  = { 'Authorization' => @oauth.auth_header(http_method: http_method, url: request_url, params: params) }
+      end
+      result
     end
 
     def url_for(fragment, query)
-      base = 'wp-json'
-      base = 'wp-json/wp/v2' if @verison == 2
+      base = 'wp-json/wp/v2'
       url = "#{@scheme}://#{@host}/#{base}/#{fragment}"
       url << ("?" + params(query)) unless query.empty?
 
@@ -86,7 +91,7 @@ module WP::API
 
     def params(query)
       uri = Addressable::URI.new
-      filter_hash = { page: query.delete('page') || 1 }
+      filter_hash = {}
       query.each do |key, value|
         filter_hash[key] = value if DIRECT_PARAMS.include?(key) || key.include?('[')
         filter_hash[key] = value
