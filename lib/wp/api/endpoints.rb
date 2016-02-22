@@ -17,14 +17,6 @@ module WP::API
       resource_subpath('posts', id, 'meta', query).first
     end
 
-    def post_categories(id, query = {})
-      resource_subpath('posts', id, 'terms/category', query)
-    end
-
-    def post_tags(id, query = {})
-      resource_subpath('posts', id, 'terms/tag', query)
-    end
-
     def comments(query = {})
       resources('comments', query)
     end
@@ -37,12 +29,20 @@ module WP::API
       resource_post('comments', data)
     end
 
+    def category(id, query = {})
+      resource('categories', id, query)
+    end
+
     def categories(query = {})
-      sub_resources('terms', 'category', query)
+      resources('categories', query)
+    end
+
+    def tag(id, query = {})
+      resource('tags', id, query)
     end
 
     def tags(query = {})
-      sub_resources('terms', 'tag', query)
+      resources('tags', query)
     end
 
     def pages(query = {})
@@ -73,7 +73,11 @@ module WP::API
       resource('users', id, query)
     end
 
-    def media(query = {})
+    def media(id, query = {})
+      resource('media', id, query)
+    end
+
+    def medias(query = {})
       resources('media', query)
     end
 
