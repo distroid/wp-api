@@ -9,6 +9,10 @@ module WP::API
       resource('posts', id, query)
     end
 
+    def create_post(data = {})
+      resource_post('posts', data)
+    end
+
     def post_named(slug)
       resource_named('posts', slug)
     end
