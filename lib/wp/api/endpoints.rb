@@ -41,6 +41,10 @@ module WP::API
       resources('categories', query)
     end
 
+    def create_category(data = {})
+      resource_post('categories', data)
+    end
+
     def tag(id, query = {})
       resource('tags', id, query)
     end
