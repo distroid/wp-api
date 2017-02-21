@@ -1,3 +1,3 @@
 module WP::API
-  class ResourceNotFoundError < Exception; end
+  class ResourceNotFoundError < StandardError; end
 end
