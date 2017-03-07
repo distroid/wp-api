@@ -13,6 +13,10 @@ module WP::API
       resource_post('posts', data)
     end
 
+    def update_post(id, data = {})
+      resource_post("posts/#{id}", data)
+    end
+
     def post_named(slug)
       resource_named('posts', slug)
     end
