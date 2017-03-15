@@ -10,11 +10,11 @@ module WP::API
     end
 
     def create_post(data = {})
-      resource_post('posts', data)
+      resource_post('posts', nil, data)
     end
 
     def update_post(id, data = {})
-      resource_post("posts/#{id}", data)
+      resource_post("posts", id, data)
     end
 
     def post_named(slug)
@@ -34,7 +34,7 @@ module WP::API
     end
 
     def create_comment(data = {})
-      resource_post('comments', data)
+      resource_post('comments', nil, data)
     end
 
     def category(id, query = {})
@@ -46,7 +46,7 @@ module WP::API
     end
 
     def create_category(data = {})
-      resource_post('categories', data)
+      resource_post('categories', nil, data)
     end
 
     def tag(id, query = {})
@@ -114,8 +114,9 @@ module WP::API
       end
     end
 
-    def resource_post(res, data = {})
-      resources, headers = post_request("#{res}", data)
+    def resource_post(res, id = nil, data = {})
+      path = id ? "#{res}/#{id}" : "#{res}"
+      resources, headers = post_request(path, data)
       resource_class(res).new(resources, headers)
     end
 
