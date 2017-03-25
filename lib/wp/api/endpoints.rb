@@ -100,6 +100,10 @@ module WP::API
     def settings(query = {})
       resources('settings', query)
     end
+    
+    def custom_types(type, query = {})
+      resources(type, query)
+    end
 
     private
 
@@ -113,8 +117,8 @@ module WP::API
 
     def resource(res, id, query = {})
       resources, headers = get_request("#{res}/#{id}", query)
-       klass = resource_class(res)
-       klass ? klass.new(resources, headers) : resources
+      klass = resource_class(res)
+      klass ? klass.new(resources, headers) : resources
     end
 
     def sub_resources(res, sub, query = {})
