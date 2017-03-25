@@ -101,6 +101,14 @@ module WP::API
       resources('settings', query)
     end
     
+    def taxonomies(query = {})
+      resources('taxonomies', query)
+    end
+    
+    def taxonomy(id, query = {})
+     resource('taxonomies', id, query)
+    end
+    
     def custom_types(type, query = {})
       resources(type, query)
     end
