@@ -134,12 +134,7 @@ module WP::API
 
     def resource_subpath(res, id, subpath, query = {})
       query.merge(should_raise_on_empty: false)
-      resources, headers = get_request("#{res}/#{id}/#{subpath}", query)
-      resource_name      = subpath.split('/').last
-      resources.collect do |hash|
-        klass = resource_class(res)
-        klass ? klass.new(hash, headers) : hash
-      end
+      get_request("#{res}/#{id}/#{subpath}", query)
     end
 
     def resource_named(res, slug)
