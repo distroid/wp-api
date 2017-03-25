@@ -92,6 +92,14 @@ module WP::API
     def medias(query = {})
       resources('media', query)
     end
+    
+    def types(query = {})
+      resources('types', query)
+    end
+    
+    def settings(query = {})
+      resources('settings', query)
+    end
 
     private
 
