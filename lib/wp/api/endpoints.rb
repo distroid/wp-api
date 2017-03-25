@@ -107,7 +107,7 @@ module WP::API
       resources, headers = get_request(res, query)
       resources.collect do |hash|
         klass = resource_class(res)
- +      klass ? klass.new(hash, headers) : hash
+        klass ? klass.new(hash, headers) : hash
       end
     end
 
