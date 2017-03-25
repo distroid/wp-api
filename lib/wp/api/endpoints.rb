@@ -117,7 +117,7 @@ module WP::API
 
     def resources(res, query = {})
       resources, headers = get_request(res, query)
-      resources.collect do |hash|
+      Array(resources).collect do |hash|
         klass = resource_class(res)
         klass ? klass.new(hash, headers) : hash
       end
@@ -131,7 +131,7 @@ module WP::API
 
     def sub_resources(res, sub, query = {})
       resources, headers = get_request("#{res}/#{sub}", query)
-      resources.collect do |hash|
+      Array(resources).collect do |hash|
         klass = resource_class(sub)
         klass ? klass.new(hash, headers) : hash
       end
@@ -146,7 +146,12 @@ module WP::API
 
     def resource_subpath(res, id, subpath, query = {})
       query.merge(should_raise_on_empty: false)
-      get_request("#{res}/#{id}/#{subpath}", query)
+      resources, headers = get_request("#{res}/#{id}/#{subpath}", query)
+      resource_name      = subpath.split('/').last
+      resources.collect do |hash|
+        klass = resource_class(resource_name)
+        klass ? klass.new(hash, headers) : hash
+      end
     end
 
     def resource_named(res, slug)
