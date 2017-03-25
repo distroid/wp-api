@@ -118,13 +118,8 @@ module WP::API
     def resources(res, query = {})
       resources, headers = get_request(res, query)
       Array(resources).collect do |hash|
-        begin
         klass = resource_class(res)
         klass ? klass.new(hash, headers) : hash
-        rescue => e 
-          binding.pry 
-          hash 
-        end
       end
     end
 
