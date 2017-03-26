@@ -112,6 +112,10 @@ module WP::API
     def custom_types(type, query = {})
       resources(type, query)
     end
+    
+    def custom_type(type, id, query = {})
+      resource(type, id, query)
+    end
 
     private
 
