@@ -18,6 +18,14 @@ module WP::API
       return super unless client
       client.post_meta(id)
     end
+    
+    def post_url 
+      "#{pluralized_type}/#{id}"
+    end
+    
+    def pluralized_type 
+      attributes['type'].to_s.pluralize
+    end
 
     protected
 
