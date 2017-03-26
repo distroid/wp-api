@@ -61,9 +61,8 @@ module WP::API
       options[:body] = data
 
       response       = Client.post(path, options)
-      binding.pry
       if !(200..201).include? response.code
-        raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
+        raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path + ': ' + response.dig('message'))
       elsif (response.parsed_response.nil? || response.parsed_response.empty?) && should_raise_on_empty
         raise WP::API::ResourceNotFoundError.new('Empty responce for ' + path)
       else
