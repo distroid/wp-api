@@ -43,6 +43,7 @@ module WP::API
       path    = url_for(resource, ActiveSupport::HashWithIndifferentAccess.new(query))
       options = request_options('get', url_for(resource, {}), query)
 
+      puts "Request Options: #{options}"
       response = Client.get(path, options)
       if response.code != 200
         raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
