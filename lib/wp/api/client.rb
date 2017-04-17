@@ -16,10 +16,11 @@ module WP::API
     DIRECT_PARAMS = %w(type context filter)
 
     def initialize(host:, scheme: 'http')
-      @scheme     = scheme
-      @host       = host
+      @scheme = scheme
+      @host = host
       @basic_auth = {}
-      @oauth      = nil
+      @proxy = {}
+      @oauth = nil
 
       fail ':host is required' unless host.is_a?(String) && host.length > 0
     end
@@ -30,6 +31,15 @@ module WP::API
 
     def basic_auth(username:, password:)
       @basic_auth = {username: username, password: password}
+    end
+
+    def set_proxy(address, port, username = nil, password = nil)
+      @proxy = {
+        http_proxyaddr: address,
+        http_proxyport: port,
+        http_proxyuser: username,
+        http_proxypass: password
+      }.compact
     end
 
     def oauth(consumer_key:, consumer_secret:, oauth_token:, oauth_token_secret:)
@@ -73,10 +83,11 @@ module WP::API
     private
 
     def request_options(http_method, request_url, params)
-      result              = {}
+      result = {}
       result[:basic_auth] = @basic_auth unless @basic_auth.empty?
+      result.merge!(@proxy) unless @proxy.empty?
       unless @oauth.nil?
-        result[:headers]  = { 'Authorization' => @oauth.auth_header(http_method: http_method, url: request_url, params: params) }
+        result[:headers] = { 'Authorization' => @oauth.auth_header(http_method: http_method, url: request_url, params: params) }
       end
       result
     end
