@@ -85,7 +85,7 @@ module WP::API
     def request_options(http_method, request_url, params)
       result = {}
       result[:basic_auth] = @basic_auth unless @basic_auth.empty?
-      result.merge(@proxy) unless @proxy.empty?
+      result.merge!(@proxy) unless @proxy.empty?
       unless @oauth.nil?
         result[:headers] = { 'Authorization' => @oauth.auth_header(http_method: http_method, url: request_url, params: params) }
       end
