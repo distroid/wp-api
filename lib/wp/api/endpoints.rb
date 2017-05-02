@@ -85,6 +85,10 @@ module WP::API
       resource('users', id, query)
     end
 
+    def update_user(id, data = {})
+      resource_post("users", id, data)
+    end
+
     def media(id, query = {})
       resource('media', id, query)
     end
@@ -102,7 +106,7 @@ module WP::API
       resource('settings')
     end
 
-    def change_settings(query)
+    def update_settings(query)
       resource_post('settings', nil, query)
     end
 
