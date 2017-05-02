@@ -93,7 +93,8 @@ module WP::API
     end
 
     def url_for(fragment, query)
-      base = 'wp-json/wp/v2'
+      base = query.delete(:base_path)
+      base ||= 'wp-json/wp/v2'
       url = "#{@scheme}://#{@host}/#{base}/#{fragment}"
       url << ("?" + params(query)) unless query.empty?
 
