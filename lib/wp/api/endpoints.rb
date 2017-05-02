@@ -93,6 +93,19 @@ module WP::API
       resources('media', query)
     end
 
+    def info
+      resources, headers = get_request('', { base_path: 'wp-json' })
+      resource_class('info').new(resources, headers)
+    end
+
+    def settings
+      resource('settings')
+    end
+
+    def change_settings(query)
+      resource_post('settings', nil, query)
+    end
+
     private
 
     def resources(res, query = {})
@@ -102,8 +115,9 @@ module WP::API
       end
     end
 
-    def resource(res, id, query = {})
-      resources, headers = get_request("#{res}/#{id}", query)
+    def resource(res, id = nil, query = {})
+      path = id ? "#{res}/#{id}" : "#{res}"
+      resources, headers = get_request(path, query)
       resource_class(res).new(resources, headers)
     end
 
@@ -136,6 +150,5 @@ module WP::API
     def resource_class(res)
       WP::API::const_get(res.classify)
     end
-
   end
 end
