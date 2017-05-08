@@ -17,6 +17,10 @@ module WP::API
       resource_post("posts", id, data)
     end
 
+    def delete_post(id, data = {})
+      resource_delete("posts", id, data)
+    end
+
     def post_named(slug)
       resource_named('posts', slug)
     end
@@ -138,10 +142,15 @@ module WP::API
       resource_class(res).new(resources, headers)
     end
 
+    def resource_delete(res, id, data = {})
+      resources, headers = delete_request("#{res}/#{id}", data)
+      resource_class(res).new(resources, headers)
+    end
+
     def resource_subpath(res, id, subpath, query = {})
       query.merge(should_raise_on_empty: false)
       resources, headers = get_request("#{res}/#{id}/#{subpath}", query)
-      resource_name      = subpath.split('/').last
+      resource_name = subpath.split('/').last
       resources.collect do |hash|
         resource_class(resource_name).new(hash, headers)
       end

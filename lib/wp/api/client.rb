@@ -50,7 +50,7 @@ module WP::API
 
     def get_request(resource, query = {})
       should_raise_on_empty = query.delete(:should_raise_on_empty) { true }
-      path    = url_for(resource, ActiveSupport::HashWithIndifferentAccess.new(query))
+      path = url_for(resource, ActiveSupport::HashWithIndifferentAccess.new(query))
       options = request_options('get', url_for(resource, {}), query)
 
       response = Client.get(path, options)
@@ -66,11 +66,26 @@ module WP::API
     def post_request(resource, data = {})
       should_raise_on_empty = data.delete(:should_raise_on_empty) { true }
 
-      path           = url_for(resource, {})
-      options        = request_options('post', path, data)
+      path = url_for(resource, {})
+      options = request_options('post', path, data)
       options[:body] = data
 
-      response       = Client.post(path, options)
+      response = Client.post(path, options)
+      if !(200..201).include? response.code
+        raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
+      elsif (response.parsed_response.nil? || response.parsed_response.empty?) && should_raise_on_empty
+        raise WP::API::ResourceNotFoundError.new('Empty responce for ' + path)
+      else
+        [ response.parsed_response, response.headers ]
+      end
+    end
+
+    def delete_request(resource, data = {})
+      should_raise_on_empty = data.delete(:should_raise_on_empty) { true }
+
+      path = url_for(resource, {})
+      options = request_options('delete', path, data)
+      response = Client.delete(path, options)
       if !(200..201).include? response.code
         raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
       elsif (response.parsed_response.nil? || response.parsed_response.empty?) && should_raise_on_empty
