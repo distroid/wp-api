@@ -55,11 +55,12 @@ module WP::API
 
       response = Client.get(path, options)
       if response.code != 200
+        return [[], response.headers] if response.parsed_response['code'] == 'rest_post_invalid_page_number'
         raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
       elsif response.parsed_response.empty? && should_raise_on_empty
         raise WP::API::ResourceNotFoundError.new('Empty responce for ' + path)
       else
-        [ response.parsed_response, response.headers ]
+        [response.parsed_response, response.headers]
       end
     end
 
