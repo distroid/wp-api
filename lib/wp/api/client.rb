@@ -29,10 +29,11 @@ module WP::API
       to_s.sub(/>$/, '') + " @scheme=\"#{@scheme}\" @host=\"#{@host}\" @basic_auth=\"#{!@basic_auth.empty?}\" @oauth=\"#{!@oauth.nil?}\">"
     end
 
-    def basic_auth(username = nil, password = nil)
-      username ||= WP::API.configuration.username
-      password ||= WP::API.configuration.password
-      { username: username, password: password }
+    def basic_auth
+      {
+        username: WP::API.configuration.username,
+        password: WP::API.configuration.password
+      }
     end
 
     def set_proxy(proxy_host:, proxy_port:, proxy_username:, proxy_password:)
@@ -65,7 +66,6 @@ module WP::API
       path = url_for(resource, query)
       options = {}
       options.merge!(basic_auth: basic_auth) if authenticate?
-      binding.pry
       response = Client.get(path, options)
 
       if response.code != 200

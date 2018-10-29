@@ -25,7 +25,6 @@ module WP
       def client
         @client ||= begin
           client = Client.new(configuration.client_setup_hash)
-          client.basic_auth(configuration.basic_auth_hash) if configuration.basic_auth?
           client.oauth(configuration.oauth_hash)           if configuration.oauth? && !configuration.basic_auth?
           client.set_proxy(configuration.proxy_hash)       if configuration.via_proxy?
           client
