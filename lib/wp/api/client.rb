@@ -16,10 +16,11 @@ module WP::API
     DIRECT_PARAMS = %w(type context filter)
 
     def initialize(host:, scheme: 'http')
-      @scheme     = scheme
-      @host       = host
+      @scheme = scheme
+      @host = host
       @basic_auth = {}
-      @oauth      = nil
+      @proxy = {}
+      @oauth = nil
 
       fail ':host is required' unless host.is_a?(String) && host.length > 0
     end
@@ -32,6 +33,15 @@ module WP::API
       @basic_auth = {username: username, password: password}
     end
 
+    def set_proxy(address, port, username = nil, password = nil)
+      @proxy = {
+        http_proxyaddr: address,
+        http_proxyport: port,
+        http_proxyuser: username,
+        http_proxypass: password
+      }.compact
+    end
+
     def oauth(consumer_key:, consumer_secret:, oauth_token:, oauth_token_secret:)
       @oauth = WP::API::Oauth1.new(consumer_key: consumer_key, consumer_secret: consumer_secret, oauth_token: oauth_token, oauth_token_secret: oauth_token_secret)
     end
@@ -40,28 +50,44 @@ module WP::API
 
     def get_request(resource, query = {})
       should_raise_on_empty = query.delete(:should_raise_on_empty) { true }
-      path    = url_for(resource, ActiveSupport::HashWithIndifferentAccess.new(query))
+      path = url_for(resource, ActiveSupport::HashWithIndifferentAccess.new(query))
       options = request_options('get', url_for(resource, {}), query)
 
       puts "Request Options: #{options}"
       response = Client.get(path, options)
       if response.code != 200
+        return [[], response.headers] if response.parsed_response['code'] == 'rest_post_invalid_page_number'
         raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
       elsif response.parsed_response.empty? && should_raise_on_empty
         raise WP::API::ResourceNotFoundError.new('Empty responce for ' + path)
       else
-        [ response.parsed_response, response.headers ]
+        [response.parsed_response, response.headers]
       end
     end
 
     def post_request(resource, data = {})
       should_raise_on_empty = data.delete(:should_raise_on_empty) { true }
 
-      path           = url_for(resource, {})
-      options        = request_options('post', path, data)
+      path = url_for(resource, {})
+      options = request_options('post', path, data)
       options[:body] = data
 
-      response       = Client.post(path, options)
+      response = Client.post(path, options)
+      if !(200..201).include? response.code
+        raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path)
+      elsif (response.parsed_response.nil? || response.parsed_response.empty?) && should_raise_on_empty
+        raise WP::API::ResourceNotFoundError.new('Empty responce for ' + path)
+      else
+        [ response.parsed_response, response.headers ]
+      end
+    end
+
+    def delete_request(resource, data = {})
+      should_raise_on_empty = data.delete(:should_raise_on_empty) { true }
+
+      path = url_for(resource, {})
+      options = request_options('delete', path, data)
+      response = Client.delete(path, options)
       if !(200..201).include? response.code
         raise WP::API::ResourceNotFoundError.new('Invalid HTTP code (' + response.code.to_s + ') for ' + path + ': ' + response.dig('message'))
       elsif (response.parsed_response.nil? || response.parsed_response.empty?) && should_raise_on_empty
@@ -74,16 +100,18 @@ module WP::API
     private
 
     def request_options(http_method, request_url, params)
-      result              = {}
+      result = {}
       result[:basic_auth] = @basic_auth unless @basic_auth.empty?
+      result.merge!(@proxy) unless @proxy.empty?
       unless @oauth.nil?
-        result[:headers]  = { 'Authorization' => @oauth.auth_header(http_method: http_method, url: request_url, params: params) }
+        result[:headers] = { 'Authorization' => @oauth.auth_header(http_method: http_method, url: request_url, params: params) }
       end
       result
     end
 
     def url_for(fragment, query)
-      base = 'wp-json/wp/v2'
+      base = query.delete(:base_path)
+      base ||= 'wp-json/wp/v2'
       url = "#{@scheme}://#{@host}/#{base}/#{fragment}"
       url << ("?" + params(query)) unless query.empty?
 

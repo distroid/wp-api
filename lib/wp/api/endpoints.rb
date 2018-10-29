@@ -17,6 +17,10 @@ module WP::API
       resource_post("posts", id, data)
     end
 
+    def delete_post(id, data = {})
+      resource_delete("posts", id, data)
+    end
+
     def post_named(slug)
       resource_named('posts', slug)
     end
@@ -85,6 +89,10 @@ module WP::API
       resource('users', id, query)
     end
 
+    def update_user(id, data = {})
+      resource_post("users", id, data)
+    end
+
     def media(id, query = {})
       resource('media', id, query)
     end
@@ -92,29 +100,42 @@ module WP::API
     def medias(query = {})
       resources('media', query)
     end
-    
+
     def types(query = {})
       resources('types', query)
     end
-    
+
     def settings(query = {})
       resources('settings', query)
     end
-    
+
     def taxonomies(query = {})
       resources('taxonomies', query)
     end
-    
+
     def taxonomy(id, query = {})
      resource('taxonomies', id, query)
     end
-    
+
     def custom_types(type, query = {})
       resources(type, query)
     end
-    
+
     def custom_type(type, id, query = {})
       resource(type, id, query)
+    end
+
+    def info
+      resources, headers = get_request('', { base_path: 'wp-json' })
+      resource_class('info').new(resources, headers)
+    end
+
+    def settings
+      resource('settings')
+    end
+
+    def update_settings(query)
+      resource_post('settings', nil, query)
     end
 
     private
@@ -127,10 +148,10 @@ module WP::API
       end
     end
 
-    def resource(res, id, query = {})
-      resources, headers = get_request("#{res}/#{id}", query)
-      klass = resource_class(res)
-      klass ? klass.new(resources, headers) : resources
+    def resource(res, id = nil, query = {})
+      path = id ? "#{res}/#{id}" : "#{res}"
+      resources, headers = get_request(path, query)
+      resource_class(res).new(resources, headers)
     end
 
     def sub_resources(res, sub, query = {})
@@ -148,10 +169,15 @@ module WP::API
       klass ? klass.new(resources, headers) : resources
     end
 
+    def resource_delete(res, id, data = {})
+      resources, headers = delete_request("#{res}/#{id}", data)
+      resource_class(res).new(resources, headers)
+    end
+
     def resource_subpath(res, id, subpath, query = {})
       query.merge(should_raise_on_empty: false)
       resources, headers = get_request("#{res}/#{id}/#{subpath}", query)
-      resource_name      = subpath.split('/').last
+      resource_name = subpath.split('/').last
       resources.collect do |hash|
         klass = resource_class(resource_name)
         klass ? klass.new(hash, headers) : hash
@@ -164,9 +190,8 @@ module WP::API
 
     def resource_class(res)
       WP::API::const_get(res.classify)
-    rescue NameError 
+    rescue NameError
       nil
     end
-
   end
 end

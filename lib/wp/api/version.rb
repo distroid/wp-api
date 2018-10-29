@@ -1,5 +1,5 @@
 module WP
   module API
-    VERSION = "2.0.0"
+    VERSION = "0.2.6"
   end
 end

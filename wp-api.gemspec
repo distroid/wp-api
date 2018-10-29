@@ -6,11 +6,11 @@ require 'wp/api/version'
 Gem::Specification.new do |spec|
   spec.name          = "wp-api"
   spec.version       = WP::API::VERSION
-  spec.authors       = ["Colin Young"]
-  spec.email         = ["me@colinyoung.com"]
-  spec.summary       = %q{Easily access Wordpress blogs that have the new, RESTful WP API plugin installed.}
+  spec.authors       = ["Colin Young", "Ryabov Ruslan"]
+  spec.email         = ["me@colinyoung.com", "diserve.it@gmail.com"]
+  spec.summary       = %q{Easily access Wordpress blogs that have the new, RESTful WP API 2 plugin installed.}
   spec.description   = %q{Makes it incredibly easy and semantic to access Wordpress blogs that have the new, RESTful WP API plugin installed.}
-  spec.homepage      = "https://github.com/colinyoung/wp-api"
+  spec.homepage      = "https://github.com/distroid/wp-api"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
