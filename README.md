@@ -12,6 +12,16 @@ It is update original gem for compatibility with [WP REST API v2.0 (WP-API)](htt
 ## Authentication
 
 
+## Configuration
+```
+WP::API.configure do |config|
+  config.host = 'example.com'
+  config.scheme = 'https'
+  config.username = 'api'
+  config.password = 'apipassword'
+  config.endpoint = '/' # defaults to /wp-json/wp/v2/
+end
+```
 
 ## Development
 
@@ -38,11 +48,27 @@ client.users
 # List alternate post types
 client.posts(type: 'custom_posts')
 
-# Append paramters
+# Append parameters
 client.posts(posts_per_page: 1000)
 
 # Use basic auth (used to access post meta)
-client = WP::API::Client.new(host: 'yourwpsite.com', scheme: 'https', user: 'api', password: 'apipassword')
+client = WP::API::Client.new(host: 'yourwpsite.com', scheme: 'https')
+client.basic_auth(username: 'api', password: 'apipassword')
+client.post_meta(1234) # => metadata for post #1234
+
+# Use OAuth
+client = WP::API::Client.new(host: 'yourwpsite.com', scheme: 'https')
+client.oauth(
+  consumer_key:       'sdgsdgsdg',
+  consumer_secret:    'dgskdgskdghsdg',
+  oauth_token:        'sdkghsdgksdhg',
+  oauth_token_secret: 'skdlghsdkhgsdgkh'
+)
+client.post_meta(1234) # => metadata for post #1234
+
+# use proxies
+client = WP::API::Client.new(host: 'yourwpsite.com', scheme: 'https')
+client.set_proxy('1.2.3.4', 80, 'proxyusername', 'proxypassword') # username & password are optional
 client.post_meta(1234) # => metadata for post #1234
 
 ```

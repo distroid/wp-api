@@ -18,12 +18,12 @@ module WP::API
       return super unless client
       client.post_meta(id)
     end
-    
-    def post_url 
+
+    def post_url
       "#{pluralized_type}/#{id}"
     end
-    
-    def pluralized_type 
+
+    def pluralized_type
       attributes['type'].to_s.pluralize
     end
 
@@ -63,7 +63,7 @@ module WP::API
     end
 
     def _remove_entities(string)
-      return HTMLEntities.new.decode(string.gsub('&amp;','&')) if string.is_a? (String)
+      return HTMLEntities.new.decode(string.gsub('&amp;', '&')) if string.is_a? String
       string
     end
 
