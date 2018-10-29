@@ -65,7 +65,7 @@ module WP::API
       query = ActiveSupport::HashWithIndifferentAccess.new(query)
       path = url_for(resource, query)
       options = {}
-      options.merge!(basic_auth: basic_auth) if authenticate?
+      options.merge!(basic_auth).deep_stringify_keys if authenticate?
       response = Client.get(path, options)
 
       if response.code != 200
@@ -128,7 +128,6 @@ module WP::API
       base ||= 'wp-json/wp/v2'
       url = "#{@scheme}://#{@host}/#{base}/#{fragment}"
       url << ("?" + params(query)) unless query.empty?
-
       url
     end
 
@@ -140,7 +139,6 @@ module WP::API
         filter_hash[key] = value
       end
       uri.query_values = filter_hash
-
       uri.query
     end
   end

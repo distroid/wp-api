@@ -11,4 +11,13 @@ require "wp/api"
 # Pry.start
 
 require "irb"
+
+WP::API.configure do |config|
+  config.host     = 'ndciorgdev.wpengine.com'
+  config.scheme   = 'https'
+  config.endpoint = '/wp-json/wp/v2/'
+  config.username = 'ndciorgdev'
+  config.password = 'bXN4S0Y&LGuYvC3Sz^ECvJ^t'
+end
+
 IRB.start(__FILE__)
