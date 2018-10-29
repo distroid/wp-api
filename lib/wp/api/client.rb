@@ -48,12 +48,17 @@ module WP::API
 
     protected
 
-    def get_request(resource, query = {})
+    def get(resource, query = {})
       should_raise_on_empty = query.delete(:should_raise_on_empty) { true }
-      path = url_for(resource, ActiveSupport::HashWithIndifferentAccess.new(query))
-      options = request_options('get', url_for(resource, {}), query)
+      query = ActiveSupport::HashWithIndifferentAccess.new(query)
+      path = url_for(resource, query)
 
-      puts "Request Options: #{options}"
+      response = if authenticate?
+        Client.get(path, basic_auth: { username: @user, password: @password })
+      else
+        Client.get(path)
+      end
+
       response = Client.get(path, options)
       if response.code != 200
         return [[], response.headers] if response.parsed_response['code'] == 'rest_post_invalid_page_number'
