@@ -122,7 +122,7 @@ module WP::API
     end
 
     def taxonomy(id, query = {})
-     resource('taxonomies', id, query)
+      resource('taxonomies', id, query)
     end
 
     def custom_types(type, query = {})

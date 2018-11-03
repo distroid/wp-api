@@ -27,6 +27,8 @@ module WP::API
 
     def method_missing(key, new_value = nil)
       key = key.to_s
+      return attributes[new_value] if key == '[]'
+
       determinant = key[-1]
       case determinant
       when '?' # example: post.sticky?
@@ -38,7 +40,7 @@ module WP::API
       else
         # All other values. Hashes are converted to objects
         # if a resource for them exists (e.g. Authors)
-        object key, attributes[key]
+        object(key, attributes[key])
       end
     end
 

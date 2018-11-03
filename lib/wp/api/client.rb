@@ -11,13 +11,14 @@ module WP::API
     include HTTParty
     include Endpoints
 
-    HTTP_METHOD_GET = 'get'.freeze
-    HTTP_METHOD_POST = 'post'.freeze
-    HTTP_METHOD_DELETE = 'delete'.freeze
+    HTTP_METHOD_GET = 'get'
+    HTTP_METHOD_POST = 'post'
+    HTTP_METHOD_DELETE = 'delete'
+    REST_POST_INVALID_PAGE_NUMBER_ERROR = 'rest_post_invalid_page_number'
 
     default_options.update(verify: false)
 
-    attr_reader :host, :scheme, :proxy, :basic_auth
+    attr_reader :host, :scheme, :proxy, :basic_auth, :oauth
 
     DIRECT_PARAMS = %w[type context filter].freeze
 
@@ -119,14 +120,16 @@ module WP::API
       result
     end
 
-    def verify_response(response:, http_method:, path:,should_raise_on_empty: true)
+    def verify_response(response:, http_method:, path:, should_raise_on_empty: true)
       if response.code != 200 && http_method == HTTP_METHOD_GET
-        return [[], response.headers] if response.parsed_response['code'] == 'rest_post_invalid_page_number'
+        if response.parsed_response['code'] == REST_POST_INVALID_PAGE_NUMBER_ERROR
+          return [[], response.headers]
+        end
 
         raise WP::API::ResourceNotFoundError, "Invalid HTTP code (#{response.code}) for #{path}"
       elsif !(200..201).cover?(response.code) && http_method != HTTP_METHOD_GET
         raise WP::API::ResourceNotFoundError, "Invalid HTTP code (#{response.code}) for #{path}"
-      elsif response.parsed_response.blank? && should_raise_on_empty
+      elsif response.parsed_response&.empty? && should_raise_on_empty
         raise WP::API::ResourceNotFoundError, "Empty responce for #{path}: #{response.dig('message')}"
       else
         [response.parsed_response, response.headers]
@@ -137,6 +140,7 @@ module WP::API
       base = query.delete(:base_path) { 'wp-json/wp/v2' }
       url = "#{scheme}://#{host}/#{base}/#{fragment}"
       return url if query.empty?
+
       url << ('?' + params(query))
     end
 

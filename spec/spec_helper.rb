@@ -7,6 +7,7 @@ Bundler.setup
 $LOAD_PATH << File.dirname(__FILE__) + '/../'
 
 require 'wp/api'
+require 'pry'
 
 require 'spec/helpers/files_helper'
 require 'spec/helpers/wordpress_helper'

@@ -2,14 +2,14 @@
 
 describe WP::API do
   context 'raw HTTP request' do
-    let(:response) { HTTParty.get('http://wp.example.com/wp-json/posts').body }
+    let(:response) { HTTParty.get('http://wp.example.com/wp-json/wp/v2/posts').body }
     let(:file) { support_file('posts.json') }
     subject { parse_json(response) }
 
     it { should eq parse_json(file) }
   end
 
-  context '/wp-json/posts' do
+  context '/wp-json/wp/v2/posts' do
     let(:client) { WP::API['wp.example.com'] }
 
     subject { client.posts }
@@ -36,38 +36,27 @@ describe WP::API do
         expect(subject.sticky?).to eq true
       end
 
-      it('should have a title') { expect(subject.title).to eq 'First post' }
+      it('should have a title') { expect(subject.title['rendered']).to eq 'First post' }
 
       context 'author' do
-        let(:author) { subject.author }
+        let(:author) { subject.author(client) }
 
-        it 'should be converted to author class' do
-          expect(author).to be_a WP::API::Author
-        end
-      end
-
-      context 'meta' do
-        let(:meta) { subject.meta }
-
-        it 'should not be converted to a class' do
-          expect(meta).to be_a Hash
+        it 'should be converted to user class' do
+          expect(author).to be_a WP::API::User
         end
       end
 
       context 'categories' do
-        let(:categories) { subject.categories }
+        let(:categories) { subject.categories(client) }
 
-        it 'should be converted to a class' do
-          expect(categories.first).to be_a WP::API::Category
-        end
-
-        it 'should respond to #to_param' do
-          expect(categories.first.to_param).to eq 'foxes'
+        it 'return list of ids' do
+          expect(categories.size).to eq 1
+          expect(categories.first).to eq 1
         end
       end
 
       context 'link headers' do
-        its(:next) { should == '/wp-json/posts?page=2' }
+        its(:next) { should == '/wp-json/wp/v2/posts?page=2' }
         its(:prev) { should be_nil }
         its('items.size') { should eq 2 }
       end

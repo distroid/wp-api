@@ -2,20 +2,20 @@
 
 describe WP::API do
   context 'raw HTTP request' do
-    let(:response) { HTTParty.get('http://wp.example.com/wp-json/wp/v2/posts/1').body }
-    let(:file) { support_file('posts/1.json') }
+    let(:response) { HTTParty.get('http://wp.example.com/wp-json/wp/v2/users/1').body }
+    let(:file) { support_file('users/1.json') }
     subject { parse_json(response) }
 
     it { should eq parse_json(file) }
   end
 
-  context '/wp-json/wp/v2/post/:post' do
+  context '/wp-json/wp/v2/user/:user' do
     let(:client) { WP::API['wp.example.com'] }
 
-    subject { client.post(1) }
+    subject { client.user(1) }
 
-    it 'should be a post' do
-      expect(subject).to be_a WP::API::Post
+    it 'should be a user' do
+      expect(subject).to be_a WP::API::User
     end
 
     it 'should have an attributes hash' do
@@ -28,10 +28,6 @@ describe WP::API do
 
     it 'should have correct IDs' do
       expect(subject.id).to eq 1
-    end
-
-    it 'should have correct author' do
-      expect(subject.author(client).id).to eq 1
     end
   end
 end
