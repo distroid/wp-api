@@ -1,4 +1,4 @@
-# WP::API -> v.2
+# WP::API for API v.2
 
 [![Circle CI](https://circleci.com/gh/colinyoung/wp-api.png?style=badge)](https://circleci.com/gh/colinyoung/wp-api)
 
@@ -22,14 +22,17 @@ This plugin is available here: https://github.com/WP-API/Basic-Auth
 
 This also needs exposed the custom post types on the REST API. This can be done with the REST API Controller plugin.
 
+
 ```ruby
 client = WP::API['example.com']
 # or
 client = WP::API::Client.new(host: 'example.com')
 
-
 # List all posts
 client.posts
+
+# Get post by ID
+client.post(1) # => post object #1 (look to resources/post.rb)
 
 # List all users
 client.users
@@ -58,9 +61,80 @@ client.set_oauth(
 )
 client.post_meta(1234) # => metadata for post #1234
 
-# use proxies
+# use proxy for requests
 client = WP::API::Client.new(host: 'example.com', scheme: 'https')
-client.set_proxy('1.2.3.4', 80, 'proxyusername', 'proxypassword') # username & password are optional
+# username and password are optional
+client.set_proxy(
+  proxy_host: '127.0.0.1',
+  proxy_port: 80,
+  proxy_username: 'username',
+  proxy_password: 'password'
+)
 client.post_meta(1234) # => metadata for post #1234
 
 ```
+
+## Manage posts
+
+```ruby
+#List Posts
+client.posts
+
+#Create a Post
+client.create_post(
+  title: title,
+  content: content,
+  slug: slug,
+  date: published_at,
+  status: :publish,
+  categories: [1]
+)
+
+#Retrieve a Post
+client.post(1)
+
+#Update a Post
+client.update_post(
+  1,
+  {
+    title: title,
+    content: content,
+    slug: slug,
+    date: published_at,
+    status: :publish,
+    categories: [1]
+  }
+)
+
+#Delete a Post
+wrapper.delete_post(1, should_raise_on_empty: false)
+```
+
+## Site settings
+
+```ruby
+# For changes on site you should be authorized
+client = WP::API::Client.new(host: 'example.com', scheme: 'https')
+client.set_basic_auth(username: 'api', password: 'apipassword')
+
+# Update settins - site title and description
+client.update_settings(title: 'My First Site', description: 'Site description')
+```
+
+## Users
+
+```ruby
+# Get user profile
+user = client.users(search: 'wp_login', should_raise_on_empty: false)&.first
+client.update_user(user.id, name: 'Testov Test') if user.present?
+```
+
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/distroid/wp-api.
+
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
