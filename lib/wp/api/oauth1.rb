@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WP::API
   class Oauth1
     def initialize(consumer_key:, consumer_secret:, oauth_token:, oauth_token_secret:)
@@ -30,12 +32,12 @@ module WP::API
     end
 
     def header(params)
-      'OAuth ' + params.map{|name, value| "#{name}=\"#{value}\""}.join(', ')
+      'OAuth ' + params.map { |name, value| "#{name}=\"#{value}\"" }.join(', ')
     end
 
     def signature_string(http_method, url, params)
-      sorted_params = params.sort.collect{|name, value| name + '=' + url_encode(value.to_s)}.join('&')
-      [http_method.upcase, url, sorted_params].map{ |value| CGI.escape(value) }.join('&')
+      sorted_params = params.sort.collect { |name, value| name + '=' + url_encode(value.to_s) }.join('&')
+      [http_method.upcase, url, sorted_params].map { |value| CGI.escape(value) }.join('&')
     end
 
     def key
@@ -45,7 +47,7 @@ module WP::API
     def sign(key, base_string)
       digest = OpenSSL::Digest.new('sha1')
       hmac   = OpenSSL::HMAC.digest(digest, key, base_string)
-      CGI.escape Base64.encode64(hmac).chomp.gsub(/\n/, '')
+      CGI.escape Base64.encode64(hmac).chomp.delete("\n")
     end
   end
 end

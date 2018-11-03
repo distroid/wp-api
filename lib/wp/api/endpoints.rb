@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module WP::API
   module Endpoints
-
     def posts(query = {})
       resources('posts', query)
     end
@@ -14,11 +15,11 @@ module WP::API
     end
 
     def update_post(id, data = {})
-      resource_post("posts", id, data)
+      resource_post('posts', id, data)
     end
 
     def delete_post(id, data = {})
-      resource_delete("posts", id, data)
+      resource_delete('posts', id, data)
     end
 
     def post_named(slug)
@@ -74,11 +75,9 @@ module WP::API
     end
 
     def item_named(slug)
-      begin
-        item = resource_named('posts', slug)
-      rescue WP::API::ResourceNotFoundError
-        item = resource_named('pages', slug)
-      end
+      item = resource_named('posts', slug)
+    rescue WP::API::ResourceNotFoundError
+      item = resource_named('pages', slug)
     end
 
     def users(query = {})
@@ -90,7 +89,7 @@ module WP::API
     end
 
     def update_user(id, data = {})
-      resource_post("users", id, data)
+      resource_post('users', id, data)
     end
 
     def media(id, query = {})
@@ -102,16 +101,36 @@ module WP::API
     end
 
     def info
-      resources, headers = get_request('', { base_path: 'wp-json' })
-      resource_class('info').new(resources, headers)
+      resources, headers = get_request('', base_path: 'wp-json')
+      build_resource('info', resources, headers)
     end
 
-    def settings
-      resource('settings')
+    def settings(query = {})
+      resource('settings', query)
     end
 
     def update_settings(query)
       resource_post('settings', nil, query)
+    end
+
+    def types(query = {})
+      resources('types', query)
+    end
+
+    def taxonomies(query = {})
+      resources('taxonomies', query)
+    end
+
+    def taxonomy(id, query = {})
+      resource('taxonomies', id, query)
+    end
+
+    def custom_types(type, query = {})
+      resources(type, query)
+    end
+
+    def custom_type(type, id, query = {})
+      resource(type, id, query)
     end
 
     private
@@ -119,32 +138,32 @@ module WP::API
     def resources(res, query = {})
       resources, headers = get_request(res, query)
       resources.collect do |hash|
-        resource_class(res).new(hash, headers)
+        build_resource(res, hash, headers)
       end
     end
 
     def resource(res, id = nil, query = {})
-      path = id ? "#{res}/#{id}" : "#{res}"
+      path = id ? "#{res}/#{id}" : res.to_s
       resources, headers = get_request(path, query)
-      resource_class(res).new(resources, headers)
+      build_resource(res, resources, headers)
     end
 
     def sub_resources(res, sub, query = {})
       resources, headers = get_request("#{res}/#{sub}", query)
       resources.collect do |hash|
-        resource_class(sub).new(hash, headers)
+        build_resource(sub, hash, headers)
       end
     end
 
     def resource_post(res, id = nil, data = {})
-      path = id ? "#{res}/#{id}" : "#{res}"
+      path = id ? "#{res}/#{id}" : res.to_s
       resources, headers = post_request(path, data)
-      resource_class(res).new(resources, headers)
+      build_resource(res, resources, headers)
     end
 
     def resource_delete(res, id, data = {})
       resources, headers = delete_request("#{res}/#{id}", data)
-      resource_class(res).new(resources, headers)
+      build_resource(res, resources, headers)
     end
 
     def resource_subpath(res, id, subpath, query = {})
@@ -152,8 +171,13 @@ module WP::API
       resources, headers = get_request("#{res}/#{id}/#{subpath}", query)
       resource_name = subpath.split('/').last
       resources.collect do |hash|
-        resource_class(resource_name).new(hash, headers)
+        build_resource(resource_name, hash, headers)
       end
+    end
+
+    def build_resource(resource_name, data, headers)
+      klass = resource_class(resource_name)
+      klass ? klass.new(data, headers) : data
     end
 
     def resource_named(res, slug)
@@ -161,7 +185,9 @@ module WP::API
     end
 
     def resource_class(res)
-      WP::API::const_get(res.classify)
+      WP::API.const_get(res.classify)
+    rescue NameError
+      nil
     end
   end
 end

@@ -1,0 +1,7 @@
+AllCops:
+  TargetRubyVersion: 2.3
+  # If you use RuboCop with Ruby on Rails, specify TargetRailsVersion(default: 5.0).
+  TargetRailsVersion: 5.0
+Rails:
+  # If you use RuboCop with Ruby on Rails, turn on this option.
+  Enabled: false

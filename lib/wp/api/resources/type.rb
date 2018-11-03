@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
 module WP::API
-  class Info < Resource
+  class Type < Resource
   end
 end

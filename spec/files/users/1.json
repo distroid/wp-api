@@ -1,0 +1,22 @@
+{
+    "id":1,
+    "name":"CAC",
+    "url":"",
+    "description":"",
+    "link":"http:/wp.example.com/author/CAC/",
+    "slug":"CAC",
+    "avatar_urls":{},
+    "meta":[],
+    "_links":{
+        "self":[
+            {
+                "href":"http:/wp.example.com/wp-json/wp/v2/users/1"
+            }
+        ],
+        "collection":[
+            {
+                "href":"http:/wp.example.com/wp-json/wp/v2/users"
+            }
+        ]
+    }
+}

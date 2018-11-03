@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 require 'bundler/setup'
 require 'rspec/its'
 Bundler.setup
 
-$LOAD_PATH << File.dirname(__FILE__) + "/../"
+$LOAD_PATH << File.dirname(__FILE__) + '/../'
 
 require 'wp/api'
+require 'pry'
 
 require 'spec/helpers/files_helper'
 require 'spec/helpers/wordpress_helper'
@@ -13,7 +16,7 @@ require 'spec/support/mock_wordpress_server'
 
 RSpec.configure do |config|
   # some (optional) config here
-  config.before do |example|
+  config.before do |_example|
     @mock_server ||= MockWordpressServer.new
   end
 
