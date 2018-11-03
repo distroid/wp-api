@@ -1,7 +1,5 @@
 # WP::API for API v.2
 
-[![Circle CI](https://circleci.com/gh/colinyoung/wp-api.png?style=badge)](https://circleci.com/gh/colinyoung/wp-api)
-
 It is update original gem for compatibility with [WP REST API v2.0 (WP-API)](http://v2.wp-api.org/)
 
 ## Installation
@@ -77,10 +75,10 @@ client.post_meta(1234) # => metadata for post #1234
 ## Manage posts
 
 ```ruby
-#List Posts
+# List Posts
 client.posts
 
-#Create a Post
+# Create a Post
 client.create_post(
   title: title,
   content: content,
@@ -90,10 +88,10 @@ client.create_post(
   categories: [1]
 )
 
-#Retrieve a Post
+# Retrieve a Post
 client.post(1)
 
-#Update a Post
+# Update a Post
 client.update_post(
   1,
   {
@@ -106,7 +104,7 @@ client.update_post(
   }
 )
 
-#Delete a Post
+# Delete a Post
 wrapper.delete_post(1, should_raise_on_empty: false)
 ```
 
