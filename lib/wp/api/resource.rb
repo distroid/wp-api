@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support/inflector'
 
 module WP::API
@@ -5,9 +7,10 @@ module WP::API
     attr_reader :attributes, :headers
 
     def initialize(attributes, headers = {})
-      raise ResourceNotFoundError.new(self.class.name) if attributes.nil?
+      raise ResourceNotFoundError, self.class.name if attributes.nil?
+
       @attributes = attributes
-      @headers = _downcase_keys(headers).slice("link") if headers
+      @headers = _downcase_keys(headers).slice('link') if headers
     end
 
     def id
@@ -16,6 +19,7 @@ module WP::API
 
     def meta(client = nil)
       return super unless client
+
       client.post_meta(id)
     end
 
@@ -28,7 +32,7 @@ module WP::API
       when '?' # example: post.sticky?
         attributes[key.chomp(determinant)] == true
       when '!' # unsupported
-        fail NoMethodError.new(key)
+        raise NoMethodError, key
       when '=' # example: post.title = 'my new title'
         attributes[key.chomp(determinant)] = new_value
       else
@@ -55,12 +59,13 @@ module WP::API
     end
 
     def _remove_entities(string)
-      return HTMLEntities.new.decode(string.gsub('&amp;','&')) if string.is_a? (String)
+      return HTMLEntities.new.decode(string.gsub('&amp;', '&')) if string.is_a? String
+
       string
     end
 
     def _downcase_keys(hash)
-      Hash.new.tap do |new_hash|
+      {}.tap do |new_hash|
         hash.each do |k, v|
           new_hash[k.downcase] = v
         end

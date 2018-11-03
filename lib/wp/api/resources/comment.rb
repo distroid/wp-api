@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'htmlentities'
 
 module WP::API
@@ -11,17 +13,17 @@ module WP::API
     end
 
     def prev
-      item = link_header_items.find {|rel, url| rel == "prev" }
-      item.last if item
+      item = link_header_items.find { |rel, _url| rel == 'prev' }
+      item&.last
     end
 
     def next
-      item = link_header_items.find {|rel, url| rel == "next" }
-      item.last if item
+      item = link_header_items.find { |rel, _url| rel == 'next' }
+      item&.last
     end
 
     def items
-      items = link_header_items.select {|rel, url| rel == "item" }
+      items = link_header_items.select { |rel, _url| rel == 'item' }
       items.empty? ? [] : items.collect(&:last)
     end
 
@@ -34,7 +36,7 @@ module WP::API
           header.match(/<([^>]+)>/)[1]
         ]
       end
-    rescue
+    rescue StandardError
       []
     end
   end
