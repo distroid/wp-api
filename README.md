@@ -4,8 +4,10 @@ It is update original gem for compatibility with [WP REST API v2.0 (WP-API)](htt
 
 ## Installation
 
-    gem 'wp-api', git: "https://github.com/distroid/wp-api"
-    bundle
+```ruby
+gem 'wp-api', git: "https://github.com/distroid/wp-api"
+bundle
+```
 
 ## Development
 
@@ -105,7 +107,7 @@ client.update_post(
 )
 
 # Delete a Post
-wrapper.delete_post(1, should_raise_on_empty: false)
+client.delete_post(1, should_raise_on_empty: false)
 ```
 
 ## Site settings
